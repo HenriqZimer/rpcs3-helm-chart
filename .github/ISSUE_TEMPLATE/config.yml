@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or Discussion
+    url: https://github.com/HenriqZimer/rpcs3-helm-chart/discussions
+    about: For questions, use GitHub Discussions
+  - name: RPCS3 Docker Image Issues
+    url: https://github.com/linuxserver/docker-rpcs3/issues
+    about: For issues with the linuxserver.io RPCS3 image itself (not the Helm chart), use the official image repository

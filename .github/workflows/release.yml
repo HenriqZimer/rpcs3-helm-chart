@@ -1,0 +1,105 @@
+name: Release Chart
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release (e.g. v1.2.0). Must already exist and point at the tip of main.'
+        required: true
+
+permissions:
+  contents: write
+  pages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine release tag
+        id: tag
+        run: |
+          TAG="${{ inputs.tag || github.ref_name }}"
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Tag '$TAG' does not match the required vX.Y.Z format"
+            exit 1
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout tag
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ steps.tag.outputs.tag }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Verify tag points at the tip of main
+        run: |
+          git fetch origin main
+          TAG_COMMIT=$(git rev-parse "${{ steps.tag.outputs.tag }}^{commit}")
+          MAIN_COMMIT=$(git rev-parse origin/main)
+          if [ "$TAG_COMMIT" != "$MAIN_COMMIT" ]; then
+            echo "::error::Tag ${{ steps.tag.outputs.tag }} ($TAG_COMMIT) does not point at the current tip of main ($MAIN_COMMIT)."
+            echo "::error::Re-create the tag from the latest main commit and push it again."
+            exit 1
+          fi
+
+      - name: Set chart version from tag
+        run: |
+          sed -i "s/^version: .*/version: ${{ steps.tag.outputs.version }}/" chart/Chart.yaml
+          echo "Chart.yaml version set to ${{ steps.tag.outputs.version }}"
+          grep '^version:' chart/Chart.yaml
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.13.0
+
+      - name: Lint chart at release version
+        run: helm lint chart/ --strict
+
+      - name: Check if gh-pages branch exists
+        id: check-branch
+        run: |
+          if git ls-remote --heads origin gh-pages | grep gh-pages > /dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create gh-pages branch if needed
+        if: steps.check-branch.outputs.exists == 'false'
+        # Uses an isolated worktree so it never touches the checked-out tag
+        # working tree (which still holds the uncommitted version bump).
+        run: |
+          git worktree add --orphan -b gh-pages /tmp/gh-pages-init
+          git -C /tmp/gh-pages-init commit --allow-empty -m "Initialize gh-pages branch"
+          git -C /tmp/gh-pages-init push origin gh-pages
+          git worktree remove /tmp/gh-pages-init --force
+
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.6.0
+        with:
+          charts_dir: .
+          config: cr.yaml
+          skip_existing: true
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Commit chart version bump back to main
+        run: |
+          git checkout -B main
+          if git diff --quiet chart/Chart.yaml; then
+            echo "Chart.yaml already at version ${{ steps.tag.outputs.version }}, nothing to commit"
+          else
+            git add chart/Chart.yaml
+            git commit -m "chore: release chart ${{ steps.tag.outputs.version }}"
+            git push origin main
+          fi

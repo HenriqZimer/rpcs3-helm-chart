@@ -1,0 +1,53 @@
+name: Lint and Test Chart
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.13.0
+
+      - name: Run Helm Lint
+        run: |
+          helm lint chart/ --strict
+
+      - name: Validate Templates
+        run: |
+          helm template test chart/ --debug
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.6.1
+
+      - name: Run chart-testing (lint)
+        run: |
+          ct lint --config ct.yaml \
+            --target-branch ${{ github.event.repository.default_branch }} \
+            --chart-dirs . \
+            --charts chart/
+
+      - name: Create kind cluster
+        uses: helm/kind-action@v1.9.0
+        if: github.event_name == 'pull_request'
+
+      - name: Test installation
+        if: github.event_name == 'pull_request'
+        run: |
+          helm install test-release chart/ --dry-run --debug

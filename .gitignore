@@ -1,0 +1,44 @@
+# Helm packaging
+*.tgz
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# User-specific values
+values-local.yaml
+values-override.yaml
+my-values.yaml
+
+# Don't ignore examples, but ignore user copies
+!examples/
+examples/*-local.yaml
+
+# Dependency charts
+chart/charts/*.tgz
+
+# Build artifacts
+dist/
+build/
+output.yaml
+
+# Chart releaser
+.cr-release-packages/
+.cr-index/
+
+# All Contributors
+.all-contributorsrc

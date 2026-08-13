@@ -1,0 +1,22 @@
+RPCS3 has been deployed as {{ include "rpcs3.fullname" . }} in namespace {{ .Release.Namespace }}.
+
+{{- if .Values.ingress.enabled }}
+
+Access it at:
+{{- range .Values.ingress.hosts }}
+  http://{{ .host }}
+{{- end }}
+{{- else }}
+
+No Ingress is enabled. Port-forward to reach the web UI:
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "rpcs3.fullname" . }} 3000:{{ .Values.service.httpPort }}
+Then open http://localhost:3000
+{{- end }}
+
+{{- if ne .Values.env.KASMVNC_ENABLE_BASIC_AUTH "true" }}
+
+NOTE: KASMVNC_ENABLE_BASIC_AUTH is disabled — the desktop is reachable by
+anyone who can reach the Service/Ingress. Restrict access via ingress auth,
+a NetworkPolicy, or set env.KASMVNC_ENABLE_BASIC_AUTH=true with
+env.CUSTOM_USER/env.PASSWORD.
+{{- end }}

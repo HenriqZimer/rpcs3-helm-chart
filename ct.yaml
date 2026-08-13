@@ -1,0 +1,47 @@
+# Configuration for chart-testing (ct)
+# https://github.com/helm/chart-testing
+
+# Relative path to chart directories
+chart-dirs:
+  - .
+
+# List of directories to exclude
+excluded-charts: []
+
+# Path to the target branch for comparing changes
+target-branch: main
+
+# Whether to check if chart version was incremented
+check-version-increment: true
+
+# Whether to validate maintainers in Chart.yaml
+validate-maintainers: false
+
+# Whether to validate YAML files
+validate-yaml: true
+
+# Additional Helm args for lint
+helm-lint-extra-args: ""
+
+# Additional Helm args for dependency update
+helm-dependency-update-extra-args: ""
+
+# Additional arguments for kubectl
+kubectl-extra-args: ""
+
+# Whether to build dependencies before linting
+build-dependencies: true
+
+# Chart repos to add for dependency resolution
+chart-repos: []
+
+# Additional yamllint config
+yamllint-config: |
+  extends: default
+  rules:
+    line-length:
+      max: 200
+      level: warning
+    document-start: disable
+    truthy:
+      allowed-values: ['true', 'false', 'on', 'off']
