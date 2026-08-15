@@ -1,3 +1,9 @@
 owner: HenriqZimer
 git-repo: rpcs3-helm-chart
 charts-repo-url: https://henriqzimer.github.io/rpcs3-helm-chart
+
+# Single-chart repo - drop the "<name>-" prefix chart-releaser adds by default
+# (meant for monorepos), so the release tag matches the v${VERSION} tag this repo's
+# release.yml workflow already creates, instead of also creating a redundant
+# "<name>-${VERSION}" tag pointing at the same commit.
+release-name-template: "v{{ .Version }}"
