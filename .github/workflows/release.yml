@@ -93,6 +93,22 @@ jobs:
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
+      - name: Publish artifacthub-repo.yaml to gh-pages
+        run: |
+          git fetch origin gh-pages
+          git worktree add /tmp/ah-repo-sync FETCH_HEAD
+          cp artifacthub-repo.yaml /tmp/ah-repo-sync/artifacthub-repo.yaml
+          cd /tmp/ah-repo-sync
+          git add artifacthub-repo.yaml
+          if git diff --cached --quiet; then
+            echo "artifacthub-repo.yaml already up to date on gh-pages"
+          else
+            git commit -m "chore: publish artifacthub-repo.yaml (chart-releaser doesn't copy this file automatically)"
+            git push origin HEAD:gh-pages
+          fi
+          cd "$GITHUB_WORKSPACE"
+          git worktree remove /tmp/ah-repo-sync --force
+
       - name: Commit chart version bump back to main
         run: |
           git checkout -B main
