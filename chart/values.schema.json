@@ -1,0 +1,417 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RPCS3 chart values",
+  "type": "object",
+  "properties": {
+    "replicaCount": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1,
+      "default": 1,
+      "description": "Must stay at 1 - KasmVNC/webtop images keep session state in /config, no clustering/session affinity."
+    },
+    "revisionHistoryLimit": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 3
+    },
+    "imagePullSecrets": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "nameOverride": {
+      "type": "string",
+      "default": ""
+    },
+    "fullnameOverride": {
+      "type": "string",
+      "default": ""
+    },
+    "podAnnotations": {
+      "type": "object",
+      "default": {}
+    },
+    "podLabels": {
+      "type": "object",
+      "default": {}
+    },
+    "serviceAccount": {
+      "type": "object",
+      "properties": {
+        "create": {
+          "type": "boolean",
+          "default": false
+        },
+        "annotations": {
+          "type": "object",
+          "default": {}
+        },
+        "name": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    },
+    "image": {
+      "type": "object",
+      "properties": {
+        "repository": {
+          "type": "string",
+          "default": "lscr.io/linuxserver/rpcs3"
+        },
+        "tag": {
+          "type": "string",
+          "default": "latest"
+        },
+        "pullPolicy": {
+          "type": "string",
+          "enum": [
+            "Always",
+            "IfNotPresent",
+            "Never"
+          ],
+          "default": "IfNotPresent"
+        }
+      },
+      "additionalProperties": false
+    },
+    "env": {
+      "type": "object",
+      "properties": {
+        "PUID": {
+          "type": "string",
+          "default": "1000"
+        },
+        "PGID": {
+          "type": "string",
+          "default": "1000"
+        },
+        "TZ": {
+          "type": "string",
+          "default": "Etc/UTC"
+        },
+        "TITLE": {
+          "type": "string",
+          "default": "RPCS3"
+        },
+        "KASMVNC_ENABLE_BASIC_AUTH": {
+          "type": "string",
+          "enum": [
+            "true",
+            "false"
+          ],
+          "default": "false"
+        },
+        "CUSTOM_USER": {
+          "type": "string",
+          "default": ""
+        },
+        "PASSWORD": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "linuxserver.io image env vars. Extra keys (e.g. DOCKER_MODS, ROM_ROOT) are passed through as-is."
+    },
+    "extraEnv": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "envFrom": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "service": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "ClusterIP",
+            "NodePort",
+            "LoadBalancer"
+          ],
+          "default": "ClusterIP"
+        },
+        "httpPort": {
+          "type": "integer",
+          "default": 3000
+        },
+        "httpsPort": {
+          "type": "integer",
+          "default": 3001
+        },
+        "annotations": {
+          "type": "object",
+          "default": {}
+        },
+        "labels": {
+          "type": "object",
+          "default": {}
+        }
+      },
+      "additionalProperties": false
+    },
+    "ingress": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "className": {
+          "type": "string",
+          "default": "traefik"
+        },
+        "annotations": {
+          "type": "object",
+          "default": {}
+        },
+        "hosts": {
+          "type": "array",
+          "default": [
+            {
+              "host": "rpcs3.example.com",
+              "paths": [
+                {
+                  "path": "/",
+                  "pathType": "Prefix"
+                }
+              ]
+            }
+          ],
+          "items": {
+            "type": "object",
+            "properties": {
+              "host": {
+                "type": "string"
+              },
+              "paths": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string"
+                    },
+                    "pathType": {
+                      "type": "string",
+                      "enum": [
+                        "Prefix",
+                        "Exact",
+                        "ImplementationSpecific"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tls": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "default": []
+        }
+      },
+      "additionalProperties": false
+    },
+    "persistence": {
+      "type": "object",
+      "properties": {
+        "config": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "type": {
+              "type": "string",
+              "enum": [
+                "pvc",
+                "hostPath",
+                "emptyDir"
+              ],
+              "default": "pvc"
+            },
+            "hostPath": {
+              "type": "string",
+              "default": ""
+            },
+            "accessMode": {
+              "type": "string",
+              "default": "ReadWriteOnce"
+            },
+            "size": {
+              "type": "string",
+              "default": "10Gi"
+            },
+            "annotations": {
+              "type": "object",
+              "default": {}
+            },
+            "storageClass": {
+              "type": "string",
+              "default": ""
+            },
+            "existingClaim": {
+              "type": "string",
+              "default": ""
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "extraVolumes": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "extraVolumeMounts": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "shmSize": {
+      "type": "string",
+      "default": "2Gi",
+      "description": "Size of the memory-backed /dev/shm mount."
+    },
+    "streaming": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "brokerPort": {
+          "type": "integer",
+          "default": 8000
+        }
+      },
+      "additionalProperties": false
+    },
+    "gpu": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "vendor": {
+          "type": "string",
+          "enum": [
+            "intel-amd",
+            "nvidia"
+          ],
+          "default": "intel-amd"
+        },
+        "devicePath": {
+          "type": "string",
+          "default": "/dev/dri"
+        },
+        "supplementalGroups": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "default": []
+        },
+        "nvidia": {
+          "type": "object",
+          "properties": {
+            "count": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            },
+            "driverCapabilities": {
+              "type": "string",
+              "default": "all"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "seccompUnconfined": {
+      "type": "boolean",
+      "default": false
+    },
+    "resources": {
+      "type": "object",
+      "properties": {
+        "requests": {
+          "type": "object",
+          "properties": {
+            "cpu": {
+              "type": "string"
+            },
+            "memory": {
+              "type": "string"
+            }
+          }
+        },
+        "limits": {
+          "type": "object",
+          "properties": {
+            "cpu": {
+              "type": "string"
+            },
+            "memory": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "podSecurityContext": {
+      "type": "object",
+      "default": {}
+    },
+    "securityContext": {
+      "type": "object",
+      "default": {}
+    },
+    "nodeSelector": {
+      "type": "object",
+      "default": {}
+    },
+    "tolerations": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "default": []
+    },
+    "affinity": {
+      "type": "object",
+      "default": {}
+    }
+  },
+  "additionalProperties": false
+}
