@@ -1,6 +1,6 @@
 # RPCS3 Helm Chart
 
-[![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square)](https://github.com/HenriqZimer/rpcs3-helm-chart)
+[![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square)](https://github.com/HenriqZimer/rpcs3-helm-chart)
 [![AppVersion: latest](https://img.shields.io/badge/AppVersion-latest-informational?style=flat-square)](https://docs.linuxserver.io/images/docker-rpcs3/)
 
 A Helm chart for [RPCS3](https://docs.linuxserver.io/images/docker-rpcs3/) - the linuxserver.io
@@ -46,7 +46,7 @@ git clone https://github.com/HenriqZimer/rpcs3-helm-chart.git
 cd rpcs3-helm-chart
 
 helm package chart/
-helm install rpcs3 ./rpcs3-1.0.0.tgz
+helm install rpcs3 ./rpcs3-1.0.1.tgz
 ```
 
 ## Configuration
