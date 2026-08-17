@@ -2,7 +2,7 @@ apiVersion: v2
 name: rpcs3
 description: A Helm chart for RPCS3 - the linuxserver.io PS3 emulator KasmVNC webtop image
 type: application
-version: 1.0.2
+version: 1.0.3
 appVersion: "latest"
 icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/rpcs3-logo.png
 keywords:
@@ -22,6 +22,9 @@ maintainers:
     url: https://henriqzimer.com.br
 annotations:
   artifacthub.io/license: MIT
+  artifacthub.io/signKey: |
+    fingerprint: C2E2E16693F2715BA0B23913BF94E5067859562F
+    url: https://henriqzimer.github.io/rpcs3-helm-chart/HenriqZimer-helm-charts-public.asc
   artifacthub.io/links: |
     - name: Helm Repository
       url: https://henriqzimer.github.io/rpcs3-helm-chart/
@@ -37,8 +40,12 @@ annotations:
       url: https://github.com/HenriqZimer/rpcs3-helm-chart/blob/main/chart/README.md
   artifacthub.io/changes: |
     - kind: added
-      description: values.schema.json - validates values.yaml against a JSON Schema, and is what powers the "Values schema" feature/badge on ArtifactHub (previously absent)
+      description: Chart releases are now signed (helm package --sign) - see artifacthub.io/signKey for the public key location and fingerprint, powers the "Signed" badge on ArtifactHub
   artifacthub.io/changesHistory: |
+    - version: 1.0.2
+      changes:
+        - kind: added
+          description: values.schema.json - validates values.yaml against a JSON Schema, and is what powers the "Values schema" feature/badge on ArtifactHub (previously absent)
     - version: 1.0.1
       changes:
         - kind: added
