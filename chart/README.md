@@ -4,7 +4,7 @@
   <img src="https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/rpcs3-logo.png" alt="RPCS3 logo" width="140" />
 </p>
 
-[![Version: 1.0.4](https://img.shields.io/badge/Version-1.0.4-informational?style=flat-square)](https://github.com/HenriqZimer/rpcs3-helm-chart)
+[![Version: 1.0.5](https://img.shields.io/badge/Version-1.0.5-informational?style=flat-square)](https://github.com/HenriqZimer/rpcs3-helm-chart)
 [![AppVersion: latest](https://img.shields.io/badge/AppVersion-latest-informational?style=flat-square)](https://docs.linuxserver.io/images/docker-rpcs3/)
 
 A Helm chart for [RPCS3](https://docs.linuxserver.io/images/docker-rpcs3/) - the linuxserver.io
@@ -14,11 +14,11 @@ PlayStation 3 emulator, served as a full desktop over the browser via KasmVNC.
 
 ```bash
 # Add the Helm repository
-helm repo add rpcs3 https://henriqzimer.github.io/rpcs3-helm-chart
+helm repo add rpcs3-helm-chart https://henriqzimer.github.io/rpcs3-helm-chart/
 helm repo update
 
 # Install RPCS3
-helm install rpcs3 rpcs3/rpcs3
+helm install my-rpcs3 rpcs3-helm-chart/rpcs3 --version 1.0.5
 ```
 
 ## Prerequisites
@@ -37,10 +37,10 @@ helm install rpcs3 rpcs3/rpcs3
 ### From Helm Repository
 
 ```bash
-helm repo add rpcs3 https://henriqzimer.github.io/rpcs3-helm-chart
+helm repo add rpcs3-helm-chart https://henriqzimer.github.io/rpcs3-helm-chart/
 helm repo update
 
-helm install rpcs3 rpcs3/rpcs3
+helm install my-rpcs3 rpcs3-helm-chart/rpcs3 --version 1.0.5
 ```
 
 ### From Source
@@ -50,7 +50,7 @@ git clone https://github.com/HenriqZimer/rpcs3-helm-chart.git
 cd rpcs3-helm-chart
 
 helm package chart/
-helm install rpcs3 ./rpcs3-1.0.4.tgz
+helm install my-rpcs3 ./rpcs3-1.0.5.tgz
 ```
 
 ## Configuration

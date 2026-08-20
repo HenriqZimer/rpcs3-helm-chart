@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.5] - 2026-08-17
+
+### Fixed
+- README install commands now use a unique repo alias (`rpcs3-helm-chart`) instead of the bare chart name, and pin `--version` explicitly.
+
 ## [1.0.4] - 2026-08-17
 
 ### Changed

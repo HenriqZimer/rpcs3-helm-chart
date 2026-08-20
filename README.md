@@ -28,14 +28,14 @@ your network:
 ### Add Helm Repository
 
 ```bash
-helm repo add rpcs3 https://henriqzimer.github.io/rpcs3-helm-chart/
+helm repo add rpcs3-helm-chart https://henriqzimer.github.io/rpcs3-helm-chart/
 helm repo update
 ```
 
 ### Install Chart
 
 ```bash
-helm install rpcs3 rpcs3/rpcs3
+helm install my-rpcs3 rpcs3-helm-chart/rpcs3 --version 1.0.5
 ```
 
 For detailed installation instructions and configuration options, see the [chart README](chart/README.md).

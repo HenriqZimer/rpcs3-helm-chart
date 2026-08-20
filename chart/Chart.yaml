@@ -2,7 +2,7 @@ apiVersion: v2
 name: rpcs3
 description: A Helm chart for RPCS3 - the linuxserver.io PS3 emulator KasmVNC webtop image
 type: application
-version: 1.0.4
+version: 1.0.5
 appVersion: "latest"
 icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/rpcs3-logo.png
 keywords:
@@ -39,9 +39,13 @@ annotations:
     - name: Documentation
       url: https://github.com/HenriqZimer/rpcs3-helm-chart/blob/main/chart/README.md
   artifacthub.io/changes: |
-    - kind: changed
-      description: README now shows the emulator's logo at the top (linuxserver.io's own image, same one used for the chart icon)
+    - kind: fixed
+      description: README install commands now use a unique repo alias (<name>-helm-chart) instead of the bare chart name, and pin --version explicitly, matching what actually works
   artifacthub.io/changesHistory: |
+    - version: 1.0.4
+      changes:
+        - kind: changed
+          description: README now shows the emulator's logo at the top (linuxserver.io's own image, same one used for the chart icon)
     - version: 1.0.3
       changes:
         - kind: added
