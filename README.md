@@ -1,5 +1,9 @@
 # RPCS3 Helm Chart Repository
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/rpcs3-logo.png" alt="RPCS3 logo" width="140" />
+</p>
+
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Helm Version](https://img.shields.io/badge/Helm-v3-blue)](https://helm.sh)
 [![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/rpcs3-helm-chart)](https://artifacthub.io/packages/search?repo=rpcs3-helm-chart)
