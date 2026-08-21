@@ -3,6 +3,89 @@ entries:
   rpcs3:
   - annotations:
       artifacthub.io/changes: |
+        - kind: fixed
+          description: "sunshine.* now also mounts /dev/uhid - without it, Sunshine falls back to emulating gamepads as a generic Xbox One controller when the client reports a PlayStation-type pad (DualShock/DualSense), and that fallback does not correctly forward face buttons/triggers (confirmed: analog stick axes work, buttons don't) - the real virtual DualShock/DualSense device needs kernel uhid access to be created"
+      artifacthub.io/changesHistory: |
+        - version: 1.1.0
+          changes:
+            - kind: added
+              description: sunshine.* (POC) - Sunshine/Moonlight low-latency game streaming as an alternative to the default Selkies/KasmVNC streaming, requiring a Docker Mod (ghcr.io/henriqzimer/rpcs3-sunshine-mod) that installs Sunshine and swaps the base image's Xvfb for a real Xorg + dummy driver (Xvfb isn't linked against libudev so it can't hotplug Sunshine's uinput-created input devices), hostNetwork/privileged, and PIXELFLUX_WAYLAND=false in env
+        - version: 1.0.5
+          changes:
+            - kind: fixed
+              description: README install commands now use a unique repo alias (<name>-helm-chart) instead of the bare chart name, and pin --version explicitly, matching what actually works
+        - version: 1.0.4
+          changes:
+            - kind: changed
+              description: README now shows the emulator's logo at the top (linuxserver.io's own image, same one used for the chart icon)
+        - version: 1.0.3
+          changes:
+            - kind: added
+              description: Chart releases are now signed (helm package --sign) - see artifacthub.io/signKey for the public key location and fingerprint, powers the "Signed" badge on ArtifactHub
+        - version: 1.0.2
+          changes:
+            - kind: added
+              description: values.schema.json - validates values.yaml against a JSON Schema, and is what powers the "Values schema" feature/badge on ArtifactHub (previously absent)
+        - version: 1.0.1
+          changes:
+            - kind: added
+              description: icon, previously missing entirely - pointed at linuxserver.io's own logo image for this app, which is why no image was ever showing on ArtifactHub
+        - version: 1.0.0
+          changes:
+            - kind: added
+              description: Initial release of the RPCS3 Helm chart
+            - kind: added
+              description: GPU passthrough for both Intel/AMD (VA-API via /dev/dri) and NVIDIA (via the NVIDIA Kubernetes device plugin, gpu.vendor=nvidia)
+            - kind: added
+              description: seccompUnconfined and a 2Gi default shmSize, both carried over from this chart's sibling pcsx2-helm-chart after PCSX2's JIT recompiler was found to crash with SIGBUS under Docker/Kubernetes' default seccomp/shm limits - not independently confirmed on RPCS3, but the same base image/toolchain makes it a likely fix if you hit the same crash
+            - kind: added
+              description: streaming.enabled/streaming.brokerPort to expose the RomM emulator-streaming broker sidecar port. WARNING - the rpcs3-romm-integration mod has never been merged/released, only an unreleased ":dev" image tag exists
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Helm Repository
+          url: https://henriqzimer.github.io/rpcs3-helm-chart/
+        - name: Chart Source
+          url: https://github.com/HenriqZimer/rpcs3-helm-chart
+        - name: Maintainer Website
+          url: https://henriqzimer.com.br
+        - name: GitHub Profile
+          url: https://github.com/HenriqZimer
+        - name: linuxserver.io RPCS3 Image
+          url: https://docs.linuxserver.io/images/docker-rpcs3/
+        - name: Documentation
+          url: https://github.com/HenriqZimer/rpcs3-helm-chart/blob/main/chart/README.md
+      artifacthub.io/signKey: |
+        fingerprint: C2E2E16693F2715BA0B23913BF94E5067859562F
+        url: https://henriqzimer.github.io/rpcs3-helm-chart/HenriqZimer-helm-charts-public.asc
+    apiVersion: v2
+    appVersion: latest
+    created: "2026-08-21T15:08:32.718289849Z"
+    description: A Helm chart for RPCS3 - the linuxserver.io PS3 emulator KasmVNC
+      webtop image
+    digest: 1950b3e7d84cc377a6620f06b29b72670008b82ec99b11a961bbf925abf22d94
+    home: https://docs.linuxserver.io/images/docker-rpcs3/
+    icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/rpcs3-logo.png
+    keywords:
+    - rpcs3
+    - emulator
+    - playstation3
+    - retrogaming
+    - kasmvnc
+    - linuxserver
+    maintainers:
+    - email: henrique.zimermann@outlook.com
+      name: HenriqZimer
+      url: https://henriqzimer.com.br
+    name: rpcs3
+    sources:
+    - https://github.com/linuxserver/docker-rpcs3
+    - https://github.com/HenriqZimer/rpcs3-helm-chart
+    type: application
+    urls:
+    - https://github.com/HenriqZimer/rpcs3-helm-chart/releases/download/v1.1.1/rpcs3-1.1.1.tgz
+    version: 1.1.1
+  - annotations:
+      artifacthub.io/changes: |
         - kind: added
           description: sunshine.* (POC) - Sunshine/Moonlight low-latency game streaming as an alternative to the default Selkies/KasmVNC streaming, requiring a Docker Mod (ghcr.io/henriqzimer/rpcs3-sunshine-mod) that installs Sunshine and swaps the base image's Xvfb for a real Xorg + dummy driver (Xvfb isn't linked against libudev so it can't hotplug Sunshine's uinput-created input devices), hostNetwork/privileged, and PIXELFLUX_WAYLAND=false in env
       artifacthub.io/changesHistory: |
@@ -459,4 +542,4 @@ entries:
     urls:
     - https://henriqzimer.github.io/rpcs3-helm-chart/rpcs3-1.0.0.tgz
     version: 1.0.0
-generated: "2026-08-21T02:33:41.620341819Z"
+generated: "2026-08-21T15:08:32.718340223Z"
