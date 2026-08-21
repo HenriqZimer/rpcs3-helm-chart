@@ -151,6 +151,46 @@ streaming:
   # -- Port the broker HTTP API listens on (the mod's BROKER_PORT default).
   brokerPort: 8000
 
+# -- Sunshine/Moonlight low-latency game streaming - POC alternative to
+# the default KasmVNC streaming (see streaming above, a different
+# feature - that one is the RomM broker port, not the display itself).
+# Pair with a Docker Mod that installs Sunshine and swaps the base
+# image's Xvfb for a real Xorg + "dummy" driver - Xvfb in this image is
+# not linked against libudev, so it never hotplugs the mouse/keyboard/
+# gamepad devices Sunshine creates via /dev/uinput (confirmed by testing:
+# video/pairing work either way, but input silently does nothing without
+# the Xorg swap). Also requires PIXELFLUX_WAYLAND=false in env (the image
+# defaults to a Wayland compositor, which Sunshine can't capture) and
+# env.DOCKER_MODS pointing at the mod image.
+sunshine:
+  enabled: false
+  # -- hostNetwork is required for two reasons, both confirmed in testing:
+  # (1) Moonlight talks raw TCP+UDP on fixed ports - no HTTP, so it can't
+  # go through the Traefik Ingress like the KasmVNC/broker ports do; (2)
+  # the pod needs to share the node's network namespace for the kernel's
+  # uinput hotplug uevents (broadcast over netlink) to actually reach the
+  # udev daemon running inside the container - without it, the virtual
+  # input devices Sunshine creates are invisible to Xorg no matter what
+  # else is configured correctly.
+  hostNetwork: true
+  # -- Kubernetes has no native knob for a custom device cgroup rule (the
+  # POC needed `c 13:* rmw` - the whole "input" major - for the pod to be
+  # allowed to open the /dev/input/eventN nodes Sunshine's uinput calls
+  # create at runtime, since only /dev/uinput itself is in the default
+  # device allowlist). `privileged: true` is the bluntest way to get that
+  # on plain Kubernetes; see the chart README for the security tradeoff.
+  privileged: true
+  # -- Sunshine only accepts ONE configurable port (the "port" setting in
+  # sunshine.conf, default 47989 = "http") - every other port it listens
+  # on (https, web UI, rtsp, video, control, audio, mic) is a FIXED offset
+  # from this base (confirmed against Sunshine's source, net::map_port()
+  # does `base + offset`; offsets below reverse-engineered from the
+  # default port set: https=-5, web=+1, video=+9, control=+10, audio=+11,
+  # mic=+13, rtsp=+21). Change this if running two Sunshine-enabled
+  # emulators with hostNetwork on the SAME node - they share an IP, so
+  # their base ports can't collide.
+  port: 48389
+
 # -- GPU/hardware acceleration passthrough.
 gpu:
   enabled: false

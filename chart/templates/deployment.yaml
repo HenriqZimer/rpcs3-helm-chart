@@ -24,6 +24,10 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- if and .Values.sunshine.enabled .Values.sunshine.hostNetwork }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -37,7 +41,7 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if or .Values.securityContext .Values.seccompUnconfined }}
+          {{- if or .Values.securityContext .Values.seccompUnconfined (and .Values.sunshine.enabled .Values.sunshine.privileged) }}
           securityContext:
             {{- with .Values.securityContext }}
             {{- toYaml . | nindent 12 }}
@@ -45,6 +49,9 @@ spec:
             {{- if .Values.seccompUnconfined }}
             seccompProfile:
               type: Unconfined
+            {{- end }}
+            {{- if and .Values.sunshine.enabled .Values.sunshine.privileged }}
+            privileged: true
             {{- end }}
           {{- end }}
           ports:
@@ -59,6 +66,32 @@ spec:
               containerPort: {{ .Values.streaming.brokerPort }}
               protocol: TCP
             {{- end }}
+            {{- if .Values.sunshine.enabled }}
+            - name: sun-web
+              containerPort: {{ add .Values.sunshine.port 1 }}
+              protocol: TCP
+            - name: sun-http
+              containerPort: {{ .Values.sunshine.port }}
+              protocol: TCP
+            - name: sun-https
+              containerPort: {{ sub .Values.sunshine.port 5 }}
+              protocol: TCP
+            - name: sun-rtsp
+              containerPort: {{ add .Values.sunshine.port 21 }}
+              protocol: TCP
+            - name: sun-video
+              containerPort: {{ add .Values.sunshine.port 9 }}
+              protocol: UDP
+            - name: sun-control
+              containerPort: {{ add .Values.sunshine.port 10 }}
+              protocol: UDP
+            - name: sun-audio
+              containerPort: {{ add .Values.sunshine.port 11 }}
+              protocol: UDP
+            - name: sun-mic
+              containerPort: {{ add .Values.sunshine.port 13 }}
+              protocol: UDP
+            {{- end }}
           env:
             {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
@@ -69,6 +102,10 @@ spec:
               value: "all"
             - name: NVIDIA_DRIVER_CAPABILITIES
               value: {{ .Values.gpu.nvidia.driverCapabilities | quote }}
+            {{- end }}
+            {{- if .Values.sunshine.enabled }}
+            - name: SUNSHINE_PORT
+              value: {{ .Values.sunshine.port | quote }}
             {{- end }}
             {{- with .Values.extraEnv }}
             {{- toYaml . | nindent 12 }}
@@ -85,6 +122,12 @@ spec:
             {{- if and .Values.gpu.enabled (eq .Values.gpu.vendor "intel-amd") }}
             - name: dri
               mountPath: {{ .Values.gpu.devicePath }}
+            {{- end }}
+            {{- if .Values.sunshine.enabled }}
+            - name: uinput
+              mountPath: /dev/uinput
+            - name: dev-input
+              mountPath: /dev/input
             {{- end }}
             {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
@@ -135,6 +178,16 @@ spec:
         - name: dri
           hostPath:
             path: {{ .Values.gpu.devicePath }}
+        {{- end }}
+        {{- if .Values.sunshine.enabled }}
+        - name: uinput
+          hostPath:
+            path: /dev/uinput
+            type: CharDevice
+        - name: dev-input
+          hostPath:
+            path: /dev/input
+            type: Directory
         {{- end }}
         {{- with .Values.extraVolumes }}
         {{- toYaml . | nindent 8 }}

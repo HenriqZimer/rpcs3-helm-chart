@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-08-21
+
+### Added
+- `sunshine.*` (POC) - Sunshine/Moonlight low-latency game streaming as an alternative to the
+  default Selkies/KasmVNC streaming. Requires a Docker Mod
+  (`ghcr.io/henriqzimer/rpcs3-sunshine-mod`) that installs Sunshine and swaps the base image's
+  Xvfb for a real Xorg + "dummy" driver - Xvfb in this image isn't linked against `libudev`, so
+  it can never hotplug the mouse/keyboard/gamepad devices Sunshine creates via `/dev/uinput`.
+  Also requires `sunshine.hostNetwork`/`sunshine.privileged` (Moonlight speaks raw TCP+UDP that
+  can't go through the Ingress, and the pod needs the node's network namespace for uinput hotplug
+  uevents to reach udev, plus a device cgroup rule Kubernetes has no native knob for) and
+  `PIXELFLUX_WAYLAND=false` in `env` (the image defaults to a Wayland compositor, which Sunshine
+  can't capture).
+
 ## [1.0.5] - 2026-08-17
 
 ### Fixed

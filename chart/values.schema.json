@@ -313,6 +313,29 @@
       },
       "additionalProperties": false
     },
+    "sunshine": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "hostNetwork": {
+          "type": "boolean",
+          "default": true
+        },
+        "privileged": {
+          "type": "boolean",
+          "default": true
+        },
+        "port": {
+          "type": "integer",
+          "default": 48389,
+          "description": "Sunshine's base port (its 'http' port). Every other Sunshine port is a fixed offset from this one - see values.yaml comment."
+        }
+      },
+      "additionalProperties": false
+    },
     "gpu": {
       "type": "object",
       "properties": {
