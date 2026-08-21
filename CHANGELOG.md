@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-08-21
+
+### Added
+- `probes.enabled` (default `true`). Set to `false` to disable the readiness/liveness probe and the `http`/`https` `containerPort` declarations. Needed when running multiple `sunshine.hostNetwork` pods on the same node: the Selkies nginx (3000/3001) is hardcoded and can't be moved, so any pod beyond the first would otherwise crashloop or block scheduling entirely even though Sunshine itself works fine. Tradeoff: the web UI (KasmVNC) becomes unreachable on that pod - Moonlight is unaffected.
+
 ## [1.1.1] - 2026-08-21
 
 ### Fixed

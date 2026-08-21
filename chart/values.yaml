@@ -254,3 +254,14 @@ tolerations: []
 
 # -- Affinity rules for pod scheduling.
 affinity: {}
+
+probes:
+  # -- Desliga a readiness/liveness probe (porta http/3000 do Selkies).
+  # Precisa ficar false quando varios pods com sunshine.hostNetwork rodam
+  # no mesmo node: o nginx do Selkies escuta em 3000/3001 hardcoded (nao
+  # respeita service.httpPort), entao qualquer pod alem do primeiro nunca
+  # consegue bindar essa porta - sem desligar a probe, o kubelet mata o
+  # container em crashloop mesmo com o Sunshine funcionando normalmente.
+  # A UI web (KasmVNC) fica inacessivel nesse cenario, so o Moonlight
+  # funciona.
+  enabled: true

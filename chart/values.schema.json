@@ -336,6 +336,17 @@
       },
       "additionalProperties": false
     },
+    "probes": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Set to false when running with sunshine.hostNetwork alongside another sunshine-enabled pod on the same node - the Selkies nginx port (3000/3001) is hardcoded and collides, so its readiness/liveness probe (and the http/https containerPort declarations) must be disabled to avoid the pod being killed or refused scheduling."
+        }
+      },
+      "additionalProperties": false
+    },
     "gpu": {
       "type": "object",
       "properties": {

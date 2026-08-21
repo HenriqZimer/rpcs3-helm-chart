@@ -2,7 +2,7 @@ apiVersion: v2
 name: rpcs3
 description: A Helm chart for RPCS3 - the linuxserver.io PS3 emulator KasmVNC webtop image
 type: application
-version: 1.1.1
+version: 1.2.0
 appVersion: "latest"
 icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/rpcs3-logo.png
 keywords:
@@ -39,9 +39,13 @@ annotations:
     - name: Documentation
       url: https://github.com/HenriqZimer/rpcs3-helm-chart/blob/main/chart/README.md
   artifacthub.io/changes: |
-    - kind: fixed
-      description: "sunshine.* now also mounts /dev/uhid - without it, Sunshine falls back to emulating gamepads as a generic Xbox One controller when the client reports a PlayStation-type pad (DualShock/DualSense), and that fallback does not correctly forward face buttons/triggers (confirmed: analog stick axes work, buttons don't) - the real virtual DualShock/DualSense device needs kernel uhid access to be created"
+    - kind: added
+      description: "probes.enabled (default true) - set to false to disable the readiness/liveness probe and the http/https containerPort declarations. Needed when running multiple sunshine.hostNetwork pods on the same node: the Selkies nginx (3000/3001) is hardcoded and can't be moved, so any pod beyond the first would otherwise crashloop or block scheduling entirely even though Sunshine itself works fine. Tradeoff: the web UI (KasmVNC) becomes unreachable on that pod - Moonlight is unaffected"
   artifacthub.io/changesHistory: |
+    - version: 1.1.1
+      changes:
+        - kind: fixed
+          description: "sunshine.* now also mounts /dev/uhid - without it, Sunshine falls back to emulating gamepads as a generic Xbox One controller when the client reports a PlayStation-type pad (DualShock/DualSense), and that fallback does not correctly forward face buttons/triggers (confirmed: analog stick axes work, buttons don't) - the real virtual DualShock/DualSense device needs kernel uhid access to be created"
     - version: 1.1.0
       changes:
         - kind: added

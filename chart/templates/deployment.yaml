@@ -55,12 +55,14 @@ spec:
             {{- end }}
           {{- end }}
           ports:
+            {{- if or (not .Values.sunshine.hostNetwork) .Values.probes.enabled }}
             - name: http
               containerPort: {{ .Values.service.httpPort }}
               protocol: TCP
             - name: https
               containerPort: {{ .Values.service.httpsPort }}
               protocol: TCP
+            {{- end }}
             {{- if .Values.streaming.enabled }}
             - name: broker
               containerPort: {{ .Values.streaming.brokerPort }}
@@ -142,6 +144,7 @@ spec:
               {{- if and .Values.gpu.enabled (eq .Values.gpu.vendor "nvidia") }}
               nvidia.com/gpu: {{ .Values.gpu.nvidia.count }}
               {{- end }}
+          {{- if .Values.probes.enabled }}
           readinessProbe:
             tcpSocket:
               port: http
@@ -152,6 +155,7 @@ spec:
               port: http
             initialDelaySeconds: 30
             periodSeconds: 20
+          {{- end }}
       {{- if and .Values.gpu.enabled (eq .Values.gpu.vendor "intel-amd") }}
       {{- with .Values.gpu.supplementalGroups }}
       securityContext:
