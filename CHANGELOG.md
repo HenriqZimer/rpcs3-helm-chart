@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-08-21
+
+### Fixed
+- `sunshine.*` now also mounts `/dev/uhid` - without it, Sunshine falls back to emulating gamepads as a generic Xbox One controller when the client reports a PlayStation-type pad (DualShock/DualSense), and that fallback does not correctly forward face buttons/triggers (confirmed: analog stick axes work, buttons don't). The real virtual DualShock/DualSense device needs kernel `uhid` access to be created.
+
 ## [1.1.0] - 2026-08-21
 
 ### Added

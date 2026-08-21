@@ -126,6 +126,8 @@ spec:
             {{- if .Values.sunshine.enabled }}
             - name: uinput
               mountPath: /dev/uinput
+            - name: uhid
+              mountPath: /dev/uhid
             - name: dev-input
               mountPath: /dev/input
             {{- end }}
@@ -183,6 +185,10 @@ spec:
         - name: uinput
           hostPath:
             path: /dev/uinput
+            type: CharDevice
+        - name: uhid
+          hostPath:
+            path: /dev/uhid
             type: CharDevice
         - name: dev-input
           hostPath:

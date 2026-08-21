@@ -2,7 +2,7 @@ apiVersion: v2
 name: rpcs3
 description: A Helm chart for RPCS3 - the linuxserver.io PS3 emulator KasmVNC webtop image
 type: application
-version: 1.1.0
+version: 1.1.1
 appVersion: "latest"
 icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/rpcs3-logo.png
 keywords:
@@ -39,9 +39,13 @@ annotations:
     - name: Documentation
       url: https://github.com/HenriqZimer/rpcs3-helm-chart/blob/main/chart/README.md
   artifacthub.io/changes: |
-    - kind: added
-      description: sunshine.* (POC) - Sunshine/Moonlight low-latency game streaming as an alternative to the default Selkies/KasmVNC streaming, requiring a Docker Mod (ghcr.io/henriqzimer/rpcs3-sunshine-mod) that installs Sunshine and swaps the base image's Xvfb for a real Xorg + dummy driver (Xvfb isn't linked against libudev so it can't hotplug Sunshine's uinput-created input devices), hostNetwork/privileged, and PIXELFLUX_WAYLAND=false in env
+    - kind: fixed
+      description: "sunshine.* now also mounts /dev/uhid - without it, Sunshine falls back to emulating gamepads as a generic Xbox One controller when the client reports a PlayStation-type pad (DualShock/DualSense), and that fallback does not correctly forward face buttons/triggers (confirmed: analog stick axes work, buttons don't) - the real virtual DualShock/DualSense device needs kernel uhid access to be created"
   artifacthub.io/changesHistory: |
+    - version: 1.1.0
+      changes:
+        - kind: added
+          description: sunshine.* (POC) - Sunshine/Moonlight low-latency game streaming as an alternative to the default Selkies/KasmVNC streaming, requiring a Docker Mod (ghcr.io/henriqzimer/rpcs3-sunshine-mod) that installs Sunshine and swaps the base image's Xvfb for a real Xorg + dummy driver (Xvfb isn't linked against libudev so it can't hotplug Sunshine's uinput-created input devices), hostNetwork/privileged, and PIXELFLUX_WAYLAND=false in env
     - version: 1.0.5
       changes:
         - kind: fixed
