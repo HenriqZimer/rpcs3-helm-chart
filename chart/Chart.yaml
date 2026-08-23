@@ -2,7 +2,7 @@ apiVersion: v2
 name: rpcs3
 description: A Helm chart for RPCS3 - the linuxserver.io PS3 emulator KasmVNC webtop image
 type: application
-version: 1.2.0
+version: 1.3.0
 appVersion: "latest"
 icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/rpcs3-logo.png
 keywords:
@@ -39,9 +39,13 @@ annotations:
     - name: Documentation
       url: https://github.com/HenriqZimer/rpcs3-helm-chart/blob/main/chart/README.md
   artifacthub.io/changes: |
-    - kind: added
-      description: "probes.enabled (default true) - set to false to disable the readiness/liveness probe and the http/https containerPort declarations. Needed when running multiple sunshine.hostNetwork pods on the same node: the Selkies nginx (3000/3001) is hardcoded and can't be moved, so any pod beyond the first would otherwise crashloop or block scheduling entirely even though Sunshine itself works fine. Tradeoff: the web UI (KasmVNC) becomes unreachable on that pod - Moonlight is unaffected"
+    - kind: changed
+      description: "sunshine.hostNetwork now defaults to false, replaced by a new sunshine.service (LoadBalancer via MetalLB) as the default way to expose Moonlight's TCP/UDP ports. Root-caused in production (2026-08-23): with multiple sunshine.hostNetwork pods sharing one node, the base image's KasmVNC nginx (hardcoded on 3000/3001) collided across every pod but the first, permanently breaking browser access for all the others - LoadBalancer keeps each pod's own network namespace, so the collision can't happen regardless of how many sunshine-enabled emulators share a node. hostNetwork is kept as an opt-in fallback (sunshine.hostNetwork: true). sunshine.service supports MetalLB's allow-shared-ip (sunshine.service.sharedIPKey) so multiple emulator releases can share one external IP - set the same loadBalancerIP + sharedIPKey on each, with non-overlapping sunshine.port values."
   artifacthub.io/changesHistory: |
+    - version: 1.2.0
+      changes: |
+        - kind: added
+          description: "probes.enabled (default true) - set to false to disable the readiness/liveness probe and the http/https containerPort declarations. Needed when running multiple sunshine.hostNetwork pods on the same node: the Selkies nginx (3000/3001) is hardcoded and can't be moved, so any pod beyond the first would otherwise crashloop or block scheduling entirely even though Sunshine itself works fine. Tradeoff: the web UI (KasmVNC) becomes unreachable on that pod - Moonlight is unaffected"
     - version: 1.1.1
       changes:
         - kind: fixed

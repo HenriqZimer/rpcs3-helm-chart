@@ -172,7 +172,17 @@ sunshine:
   # udev daemon running inside the container - without it, the virtual
   # input devices Sunshine creates are invisible to Xorg no matter what
   # else is configured correctly.
-  hostNetwork: true
+  # -- Kept as an available fallback, but the DEFAULT exposure method is
+  # `service.enabled` below (a dedicated LoadBalancer Service via MetalLB),
+  # not hostNetwork. Confirmed in production (2026-08-23): with multiple
+  # sunshine-enabled emulators sharing one GPU node, hostNetwork makes them
+  # all share the node's real network stack - the base image's KasmVNC
+  # nginx binds 3000/3001 HARDCODED (ignores service.httpPort), so only the
+  # first pod to start wins those ports and every other pod loops
+  # "Address already in use" forever, losing browser/RomM access entirely.
+  # LoadBalancer keeps each pod in its own network namespace, so this
+  # collision cannot happen regardless of how many emulators share a node.
+  hostNetwork: false
   # -- Kubernetes has no native knob for a custom device cgroup rule (the
   # POC needed `c 13:* rmw` - the whole "input" major - for the pod to be
   # allowed to open the /dev/input/eventN nodes Sunshine's uinput calls
@@ -190,6 +200,32 @@ sunshine:
   # emulators with hostNetwork on the SAME node - they share an IP, so
   # their base ports can't collide.
   port: 48389
+
+  # -- Dedicated LoadBalancer Service (MetalLB) for the Moonlight TCP/UDP
+  # ports - the default exposure method now that hostNetwork above is off.
+  # Multiple emulator releases are meant to SHARE one external IP (the
+  # MetalLB pool is small) by setting the same loadBalancerIP + sharedIPKey
+  # on all of them and relying on each having a unique `port` above (see
+  # https://metallb.universe.tf/usage/#ip-address-sharing) - MetalLB allows
+  # this as long as the port sets never overlap between Services.
+  service:
+    enabled: true
+    # -- MetalLB address to request (leave empty to let MetalLB
+    # auto-assign one from the pool instead - fine for a single emulator,
+    # but auto-assign will NOT reliably reuse the same IP for shared-IP
+    # setups, so pin this explicitly when multiple releases share one IP).
+    loadBalancerIP: ""
+    # -- metallb.io/allow-shared-ip annotation value. Set the SAME string
+    # on every release that should share loadBalancerIP above; leave empty
+    # to not request IP sharing (MetalLB then needs a free address of its
+    # own for this Service).
+    sharedIPKey: ""
+    # -- Local avoids an extra hop through kube-proxy to another node and
+    # preserves the real client source IP (useful for Sunshine's own
+    # peer/pairing logic) - safe default since sunshine.enabled pods are
+    # already pinned to the GPU node via nodeSelector.
+    externalTrafficPolicy: Local
+    annotations: {}
 
 # -- GPU/hardware acceleration passthrough.
 gpu:

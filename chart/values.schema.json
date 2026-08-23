@@ -322,7 +322,7 @@
         },
         "hostNetwork": {
           "type": "boolean",
-          "default": true
+          "default": false
         },
         "privileged": {
           "type": "boolean",
@@ -332,6 +332,31 @@
           "type": "integer",
           "default": 48389,
           "description": "Sunshine's base port (its 'http' port). Every other Sunshine port is a fixed offset from this one - see values.yaml comment."
+        },
+        "service": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "loadBalancerIP": {
+              "type": "string",
+              "default": ""
+            },
+            "sharedIPKey": {
+              "type": "string",
+              "default": ""
+            },
+            "externalTrafficPolicy": {
+              "type": "string",
+              "default": "Local"
+            },
+            "annotations": {
+              "type": "object"
+            }
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false

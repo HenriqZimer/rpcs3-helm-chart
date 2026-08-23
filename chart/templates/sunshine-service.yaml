@@ -1,0 +1,56 @@
+{{- if and .Values.sunshine.enabled .Values.sunshine.service.enabled (not .Values.sunshine.hostNetwork) }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "rpcs3.fullname" . }}-sunshine
+  labels:
+    {{- include "rpcs3.labels" . | nindent 4 }}
+  annotations:
+    {{- if .Values.sunshine.service.sharedIPKey }}
+    metallb.io/allow-shared-ip: {{ .Values.sunshine.service.sharedIPKey | quote }}
+    {{- end }}
+    {{- with .Values.sunshine.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  type: LoadBalancer
+  {{- if .Values.sunshine.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.sunshine.service.loadBalancerIP }}
+  {{- end }}
+  externalTrafficPolicy: {{ .Values.sunshine.service.externalTrafficPolicy }}
+  selector:
+    {{- include "rpcs3.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: sun-https
+      port: {{ sub .Values.sunshine.port 5 }}
+      targetPort: sun-https
+      protocol: TCP
+    - name: sun-http
+      port: {{ .Values.sunshine.port }}
+      targetPort: sun-http
+      protocol: TCP
+    - name: sun-web
+      port: {{ add .Values.sunshine.port 1 }}
+      targetPort: sun-web
+      protocol: TCP
+    - name: sun-rtsp
+      port: {{ add .Values.sunshine.port 21 }}
+      targetPort: sun-rtsp
+      protocol: TCP
+    - name: sun-video
+      port: {{ add .Values.sunshine.port 9 }}
+      targetPort: sun-video
+      protocol: UDP
+    - name: sun-control
+      port: {{ add .Values.sunshine.port 10 }}
+      targetPort: sun-control
+      protocol: UDP
+    - name: sun-audio
+      port: {{ add .Values.sunshine.port 11 }}
+      targetPort: sun-audio
+      protocol: UDP
+    - name: sun-mic
+      port: {{ add .Values.sunshine.port 13 }}
+      targetPort: sun-mic
+      protocol: UDP
+{{- end }}
