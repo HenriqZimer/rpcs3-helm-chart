@@ -220,11 +220,16 @@ sunshine:
     # to not request IP sharing (MetalLB then needs a free address of its
     # own for this Service).
     sharedIPKey: ""
-    # -- Local avoids an extra hop through kube-proxy to another node and
-    # preserves the real client source IP (useful for Sunshine's own
-    # peer/pairing logic) - safe default since sunshine.enabled pods are
-    # already pinned to the GPU node via nodeSelector.
-    externalTrafficPolicy: Local
+    # -- MUST be Cluster, not Local, when multiple emulators share one IP
+    # (sharedIPKey set): MetalLB's IP-sharing with Local traffic policy
+    # requires every Service sharing that IP to have an IDENTICAL pod
+    # selector (see https://metallb.universe.tf/usage/#ip-address-sharing) -
+    # our 9 emulators are 9 different Deployments/selectors, so Local always
+    # fails allocation ("can't change sharing key") no matter how the
+    # annotation/ports are set up (confirmed in production, 2026-08-23).
+    # Cluster does not have that same-selector requirement. The tradeoff
+    # (extra kube-proxy hop, loses the real client source IP) is minor here.
+    externalTrafficPolicy: Cluster
     annotations: {}
 
 # -- GPU/hardware acceleration passthrough.
