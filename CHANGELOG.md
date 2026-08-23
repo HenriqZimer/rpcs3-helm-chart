@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.2] - 2026-08-23
+
+### Changed
+- `readinessProbe.initialDelaySeconds` 10s->30s, `livenessProbe.initialDelaySeconds` 30s->90s, and `resources.requests.cpu` 500m->1 - confirmed in production that under CPU contention on a shared GPU node, the old tight timing killed containers mid-boot (KasmVNC desktop hadn't finished starting) causing a self-sustaining restart storm; the higher CPU request also gives the scheduler an honest signal instead of letting far more pods pack onto a node than it can actually sustain under load.
+
 ## [1.2.0] - 2026-08-21
 
 ### Added
