@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.3] - 2026-08-23
+
+### Changed
+- `livenessProbe.initialDelaySeconds` 90s->120s and `failureThreshold` explicitly set to `6` (was the implicit default `3`) - confirmed in production that under heavy I/O contention from a shared NFS-backed PVC (several emulator pods cold-booting simultaneously after a node reboot), the old 150s total liveness tolerance wasn't enough for DOCKER_MODS's ephemeral apt install + KasmVNC desktop startup to finish; kubelet kept killing the container mid-boot, and each kill wiped the ephemeral DOCKER_MODS progress, creating a self-sustaining restart loop that never converged even as node load dropped. New tolerance: 120 + 6*20 = 240s.
+
 ## [1.3.2] - 2026-08-23
 
 ### Changed
