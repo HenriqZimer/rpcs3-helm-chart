@@ -4,6 +4,113 @@ entries:
   - annotations:
       artifacthub.io/changes: |
         - kind: changed
+          description: "sunshine.* mounts the host's real /dev/input again - re-enabled on explicit request (2026-08-30) after being reverted once for making every sunshine-enabled pod on the node see every other pod's virtual input devices (Xorg's AutoAddDevices picks them all up, so a Moonlight client on one emulator could send input to the others sharing the node). That tradeoff is now accepted: without host-mounted /dev/input, mouse/keyboard/gamepad intermittently failed X11 hotplug entirely (\"client bug: Invalid path\" - confirmed in production), which matters more here than cross-emulator input isolation. The mitigation for accidentally clicking into another emulator's desktop is the per-game Sunshine launcher (see each mod's launch-game.sh), not container-level isolation."
+      artifacthub.io/changesHistory: |
+        - version: 1.3.4
+          changes: |
+            - kind: changed
+              description: "livenessProbe.initialDelaySeconds bumped 90s->120s and failureThreshold explicitly set to 6 (was the implicit k8s default of 3) - confirmed in production that under heavy I/O contention from a shared NFS-backed PVC (several emulator pods cold-booting simultaneously after a node reboot), the old 150s total liveness tolerance wasn't enough for DOCKER_MODS's ephemeral apt install + KasmVNC desktop startup to finish; kubelet kept killing the container mid-boot, and each kill wiped the ephemeral DOCKER_MODS progress, creating a self-sustaining restart loop that never converged even as node load dropped. New tolerance: 120 + 6*20 = 240s."
+        - version: 1.3.2
+          changes: |
+            - kind: changed
+              description: Much more tolerant readinessProbe/livenessProbe initialDelaySeconds (10s->30s / 30s->90s) and a more realistic resources.requests.cpu (500m->1) - under real CPU contention on a shared GPU node, the old tight probe timing was killing containers mid-boot before the KasmVNC desktop finished starting, causing a self-sustaining restart storm
+        - version: 1.3.1
+          changes:
+            - kind: fixed
+              description: "sunshine.service.externalTrafficPolicy default changed from Local to Cluster - MetalLB's IP-sharing feature (allow-shared-ip) requires every Service sharing an external IP to have an IDENTICAL pod selector when using Local traffic policy, which is fundamentally incompatible with sharing one IP across multiple different emulator Deployments (confirmed in production, 2026-08-23: every non-first Service failed allocation with \"can't change sharing key\", regardless of annotation/port config). Cluster does not have that restriction. Tradeoff: an extra kube-proxy hop and loss of the real client source IP, both minor for this use case."
+        - version: 1.3.0
+          changes: |
+            - kind: changed
+              description: "sunshine.hostNetwork now defaults to false, replaced by a new sunshine.service (LoadBalancer via MetalLB) as the default way to expose Moonlight's TCP/UDP ports. Root-caused in production (2026-08-23): with multiple sunshine.hostNetwork pods sharing one node, the base image's KasmVNC nginx (hardcoded on 3000/3001) collided across every pod but the first, permanently breaking browser access for all the others - LoadBalancer keeps each pod's own network namespace, so the collision can't happen regardless of how many sunshine-enabled emulators share a node. hostNetwork is kept as an opt-in fallback (sunshine.hostNetwork: true). sunshine.service supports MetalLB's allow-shared-ip (sunshine.service.sharedIPKey) so multiple emulator releases can share one external IP - set the same loadBalancerIP + sharedIPKey on each, with non-overlapping sunshine.port values."
+        - version: 1.2.0
+          changes: |
+            - kind: added
+              description: "probes.enabled (default true) - set to false to disable the readiness/liveness probe and the http/https containerPort declarations. Needed when running multiple sunshine.hostNetwork pods on the same node: the Selkies nginx (3000/3001) is hardcoded and can't be moved, so any pod beyond the first would otherwise crashloop or block scheduling entirely even though Sunshine itself works fine. Tradeoff: the web UI (KasmVNC) becomes unreachable on that pod - Moonlight is unaffected"
+        - version: 1.1.1
+          changes:
+            - kind: fixed
+              description: "sunshine.* now also mounts /dev/uhid - without it, Sunshine falls back to emulating gamepads as a generic Xbox One controller when the client reports a PlayStation-type pad (DualShock/DualSense), and that fallback does not correctly forward face buttons/triggers (confirmed: analog stick axes work, buttons don't) - the real virtual DualShock/DualSense device needs kernel uhid access to be created"
+        - version: 1.1.0
+          changes:
+            - kind: added
+              description: sunshine.* (POC) - Sunshine/Moonlight low-latency game streaming as an alternative to the default Selkies/KasmVNC streaming, requiring a Docker Mod (ghcr.io/henriqzimer/rpcs3-sunshine-mod) that installs Sunshine and swaps the base image's Xvfb for a real Xorg + dummy driver (Xvfb isn't linked against libudev so it can't hotplug Sunshine's uinput-created input devices), hostNetwork/privileged, and PIXELFLUX_WAYLAND=false in env
+        - version: 1.0.5
+          changes:
+            - kind: fixed
+              description: README install commands now use a unique repo alias (<name>-helm-chart) instead of the bare chart name, and pin --version explicitly, matching what actually works
+        - version: 1.0.4
+          changes:
+            - kind: changed
+              description: README now shows the emulator's logo at the top (linuxserver.io's own image, same one used for the chart icon)
+        - version: 1.0.3
+          changes:
+            - kind: added
+              description: Chart releases are now signed (helm package --sign) - see artifacthub.io/signKey for the public key location and fingerprint, powers the "Signed" badge on ArtifactHub
+        - version: 1.0.2
+          changes:
+            - kind: added
+              description: values.schema.json - validates values.yaml against a JSON Schema, and is what powers the "Values schema" feature/badge on ArtifactHub (previously absent)
+        - version: 1.0.1
+          changes:
+            - kind: added
+              description: icon, previously missing entirely - pointed at linuxserver.io's own logo image for this app, which is why no image was ever showing on ArtifactHub
+        - version: 1.0.0
+          changes:
+            - kind: added
+              description: Initial release of the RPCS3 Helm chart
+            - kind: added
+              description: GPU passthrough for both Intel/AMD (VA-API via /dev/dri) and NVIDIA (via the NVIDIA Kubernetes device plugin, gpu.vendor=nvidia)
+            - kind: added
+              description: seccompUnconfined and a 2Gi default shmSize, both carried over from this chart's sibling pcsx2-helm-chart after PCSX2's JIT recompiler was found to crash with SIGBUS under Docker/Kubernetes' default seccomp/shm limits - not independently confirmed on RPCS3, but the same base image/toolchain makes it a likely fix if you hit the same crash
+            - kind: added
+              description: streaming.enabled/streaming.brokerPort to expose the RomM emulator-streaming broker sidecar port. WARNING - the rpcs3-romm-integration mod has never been merged/released, only an unreleased ":dev" image tag exists
+      artifacthub.io/license: MIT
+      artifacthub.io/links: |
+        - name: Helm Repository
+          url: https://henriqzimer.github.io/rpcs3-helm-chart/
+        - name: Chart Source
+          url: https://github.com/HenriqZimer/rpcs3-helm-chart
+        - name: Maintainer Website
+          url: https://henriqzimer.com.br
+        - name: GitHub Profile
+          url: https://github.com/HenriqZimer
+        - name: linuxserver.io RPCS3 Image
+          url: https://docs.linuxserver.io/images/docker-rpcs3/
+        - name: Documentation
+          url: https://github.com/HenriqZimer/rpcs3-helm-chart/blob/main/chart/README.md
+      artifacthub.io/signKey: |
+        fingerprint: C2E2E16693F2715BA0B23913BF94E5067859562F
+        url: https://henriqzimer.github.io/rpcs3-helm-chart/HenriqZimer-helm-charts-public.asc
+    apiVersion: v2
+    appVersion: latest
+    created: "2026-08-30T14:13:28.400984143Z"
+    description: A Helm chart for RPCS3 - the linuxserver.io PS3 emulator KasmVNC
+      webtop image
+    digest: 5e51068989dd45fa9aa27c5d265a6c0e16766ac07a2cbf6489ec2fc627cdc43b
+    home: https://docs.linuxserver.io/images/docker-rpcs3/
+    icon: https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/rpcs3-logo.png
+    keywords:
+    - rpcs3
+    - emulator
+    - playstation3
+    - retrogaming
+    - kasmvnc
+    - linuxserver
+    maintainers:
+    - email: henrique.zimermann@outlook.com
+      name: HenriqZimer
+      url: https://henriqzimer.com.br
+    name: rpcs3
+    sources:
+    - https://github.com/linuxserver/docker-rpcs3
+    - https://github.com/HenriqZimer/rpcs3-helm-chart
+    type: application
+    urls:
+    - https://github.com/HenriqZimer/rpcs3-helm-chart/releases/download/v1.3.5/rpcs3-1.3.5.tgz
+    version: 1.3.5
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
           description: "livenessProbe.initialDelaySeconds bumped 90s->120s and failureThreshold explicitly set to 6 (was the implicit k8s default of 3) - confirmed in production that under heavy I/O contention from a shared NFS-backed PVC (several emulator pods cold-booting simultaneously after a node reboot), the old 150s total liveness tolerance wasn't enough for DOCKER_MODS's ephemeral apt install + KasmVNC desktop startup to finish; kubelet kept killing the container mid-boot, and each kill wiped the ephemeral DOCKER_MODS progress, creating a self-sustaining restart loop that never converged even as node load dropped. New tolerance: 120 + 6*20 = 240s."
       artifacthub.io/changesHistory: |
         - version: 1.3.2
@@ -1120,4 +1227,4 @@ entries:
     urls:
     - https://henriqzimer.github.io/rpcs3-helm-chart/rpcs3-1.0.0.tgz
     version: 1.0.0
-generated: "2026-08-26T23:49:04.397562454Z"
+generated: "2026-08-30T14:13:28.401111614Z"
