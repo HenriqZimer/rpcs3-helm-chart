@@ -130,6 +130,8 @@ spec:
               mountPath: /dev/uinput
             - name: uhid
               mountPath: /dev/uhid
+            - name: dev-input
+              mountPath: /dev/input
             {{- end }}
             {{- with .Values.extraVolumeMounts }}
             {{- toYaml . | nindent 12 }}
@@ -194,6 +196,25 @@ spec:
           hostPath:
             path: /dev/uhid
             type: CharDevice
+        # -- Real host /dev/input (not the container's own private,
+        # udevd-populated tree) - without this, /dev/input/eventN nodes
+        # for the mouse/keyboard/gamepad Sunshine creates per session
+        # intermittently fail X11 hotplug with "client bug: Invalid path"
+        # (confirmed in production, 2026-08-30). KNOWN TRADEOFF, ACCEPTED
+        # (2026-08-30): since /dev/input is host-wide, every sunshine-
+        # enabled pod on the same node sees every other pod's virtual
+        # input devices too (Xorg's AutoAddDevices picks them all up) -
+        # a Moonlight client connected to one emulator can send input
+        # to every other one sharing the node. This was reverted once
+        # before over that exact concern; re-enabled on request because
+        # reliable input matters more here than isolation, and the
+        # per-game Sunshine launcher (root/usr/share/sunshine-mod-assets/
+        # launch-game.sh in each *-sunshine-mod) already avoids exposing
+        # the desktop/other emulators' UI to begin with.
+        - name: dev-input
+          hostPath:
+            path: /dev/input
+            type: Directory
         {{- end }}
         {{- with .Values.extraVolumes }}
         {{- toYaml . | nindent 8 }}
