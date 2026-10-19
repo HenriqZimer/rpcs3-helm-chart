@@ -4,8 +4,8 @@
   <img src="https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/rpcs3-logo.png" alt="RPCS3 logo" width="140" />
 </p>
 
-[![Version: 1.0.5](https://img.shields.io/badge/Version-1.0.5-informational?style=flat-square)](https://github.com/HenriqZimer/rpcs3-helm-chart)
-[![AppVersion: latest](https://img.shields.io/badge/AppVersion-latest-informational?style=flat-square)](https://docs.linuxserver.io/images/docker-rpcs3/)
+[![Version: 1.4.0](https://img.shields.io/badge/Version-1.4.0-informational?style=flat-square)](https://github.com/HenriqZimer/rpcs3-helm-chart)
+[![AppVersion: build-1b1b7dea308e8385a636ddf208c77498b01bc061](https://img.shields.io/badge/AppVersion-build--1b1b7dea308e8385a636ddf208c77498b01bc061-informational?style=flat-square)](https://docs.linuxserver.io/images/docker-rpcs3/)
 
 A Helm chart for [RPCS3](https://docs.linuxserver.io/images/docker-rpcs3/) - the linuxserver.io
 PlayStation 3 emulator, served as a full desktop over the browser via KasmVNC.
@@ -252,7 +252,7 @@ for the full `streaming` schema.
 |---|---|---|
 | `replicaCount` | `1` | Number of replicas. Must stay at 1 — no session clustering. |
 | `image.repository` | `lscr.io/linuxserver/rpcs3` | Container image. |
-| `image.tag` | `latest` | Image tag. |
+| `image.tag` | `build-1b1b7dea308e8385a636ddf208c77498b01bc061-ls2` | Image tag. |
 | `env.PUID` / `env.PGID` | `1000` / `1000` | User/group the app runs as; match your storage's ownership. |
 | `env.TZ` | `Etc/UTC` | Timezone. |
 | `env.KASMVNC_ENABLE_BASIC_AUTH` | `false` | Require basic auth on the web UI. |

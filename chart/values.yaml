@@ -32,8 +32,10 @@ serviceAccount:
 image:
   # -- linuxserver.io RPCS3 image repository.
   repository: lscr.io/linuxserver/rpcs3
-  # -- Image tag. "latest" tracks linuxserver's rolling release.
-  tag: "latest"
+  # -- Image tag, pinned to the linuxserver.io build the chart was last tested
+  # against (build-1b1b7dea308e8385a636ddf208c77498b01bc061). Bump it to follow new releases, or set "latest" to track
+  # the rolling release. Available tags: https://github.com/linuxserver/docker-rpcs3/pkgs/container/rpcs3
+  tag: "build-1b1b7dea308e8385a636ddf208c77498b01bc061-ls2"
   # -- Image pull policy.
   pullPolicy: IfNotPresent
 
@@ -57,6 +59,32 @@ env:
   # Prefer envFrom/extraEnv with a Secret over setting this in plaintext.
   PASSWORD: ""
 
+  # --- Optional settings (Selkies base image) -----------------------------
+  # The linuxserver.io images are now built on the Selkies base image (the
+  # old KasmVNC base is gone), so the container is configured through the
+  # variables below - add any of them to this `env` map. Full reference:
+  # https://docs.linuxserver.io/selkies/user-guide/configuration/
+  #
+  # Authentication: basic auth is enabled simply by setting CUSTOM_USER and
+  # PASSWORD above (if PASSWORD is empty there is no auth at all).
+  #
+  # GPU encoding/rendering (pair with `gpu.enabled: true`): pick the render
+  # node when the host has more than one GPU.
+  #   DRI_NODE: "/dev/dri/renderD128"  # GPU used for VAAPI/NVENC stream encoding
+  #   DRINODE: "/dev/dri/renderD128"   # GPU used for EGL/3D rendering
+  #   AUTO_GPU: "true"                 # "false" disables auto-pick, or a vendor name (nvidia, amdgpu, intel)
+  # Streaming quality/latency:
+  #   SELKIES_VIDEO_STREAMING_MODE: "true"  # encode every frame ("turbo"), better for gaming/full-motion
+  #   SELKIES_ENCODER: "h264enc"            # first item is the default; list = what the sidebar offers
+  #   SELKIES_FRAMERATE: "60"               # initial FPS ("8-240" range, or "60,8-120")
+  #   SELKIES_VIDEO_CRF: "25"               # quality, lower = better (5-50)
+  # Behaviour:
+  #   LC_ALL: "pt_BR.UTF-8"        # session language
+  #   NO_GAMEPAD: "true"           # disable the userspace gamepad interposer
+  #   NO_DECOR: "true"             # run the app without window borders
+  #   SUBFOLDER: "/emulator/"      # when served from a subpath behind a reverse proxy (both slashes)
+  #   FILE_MANAGER_PATH: "/config" # default upload/download path (must be writable by the app user)
+  #   DOCKER_MODS: "..."           # extra functionality layered at runtime
 # -- Extra environment variables, in raw Kubernetes `env` entry form
 # (supports valueFrom). Merged after the `env` map above.
 extraEnv: []

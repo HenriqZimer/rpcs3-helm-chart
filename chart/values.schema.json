@@ -65,7 +65,7 @@
         },
         "tag": {
           "type": "string",
-          "default": "latest"
+          "default": "build-1b1b7dea308e8385a636ddf208c77498b01bc061-ls2"
         },
         "pullPolicy": {
           "type": "string",
